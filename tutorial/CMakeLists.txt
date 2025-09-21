@@ -5,8 +5,8 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type")
 project(tutorial
 		LANGUAGES C CXX
 )
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+# set(BIN_DIR ${PROJECT_SOURCE_DIR}/../_bin CACHE PATH "workflow bin")
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
 
 if(ANDROID)
 	link_directories(${OPENSSL_LINK_DIR})
@@ -15,9 +15,13 @@ else()
 	find_package(OpenSSL REQUIRED)
 endif()
 
-find_package(workflow REQUIRED CONFIG HINTS ..)
-include_directories(${OPENSSL_INCLUDE_DIR} ${WORKFLOW_INCLUDE_DIR})
-link_directories(${WORKFLOW_LIB_DIR})
+# find_package(workflow REQUIRED CONFIG HINTS ..)
+# include_directories(${OPENSSL_INCLUDE_DIR} ${WORKFLOW_INCLUDE_DIR})
+# link_directories(${WORKFLOW_LIB_DIR})
+
+include_directories(${OPENSSL_INCLUDE_DIR} ${INC_DIR})
+link_directories(${LIB_DIR})
+set(WORKFLOW_LIB_DIR ${LIB_DIR})
 
 find_library(WORKFLOW_LIB NAMES libworkflow.a workflow HINTS ${WORKFLOW_LIB_DIR})
 
@@ -131,30 +135,30 @@ if (KAFKA STREQUAL "y")
 endif ()
 
 set(DIR10 tutorial-10-user_defined_protocol)
-add_executable(server ${DIR10}/server.cc ${DIR10}/message.cc)
-add_executable(client ${DIR10}/client.cc ${DIR10}/message.cc)
+add_executable(server_tutorial ${DIR10}/server.cc ${DIR10}/message.cc)
+add_executable(client_tutorial ${DIR10}/client.cc ${DIR10}/message.cc)
 add_executable(server-uds ${DIR10}/server-uds.cc ${DIR10}/message.cc)
 add_executable(client-uds ${DIR10}/client-uds.cc ${DIR10}/message.cc)
-target_link_libraries(server ${LIB})
-target_link_libraries(client ${LIB})
+target_link_libraries(server_tutorial ${LIB})
+target_link_libraries(client_tutorial ${LIB})
 target_link_libraries(server-uds ${LIB})
 target_link_libraries(client-uds ${LIB})
 
-set_target_properties(server PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
-set_target_properties(client PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
-set_target_properties(server-uds PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
-set_target_properties(client-uds PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
+# set_target_properties(server_tutorial PROPERTIES
+# 	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
+# set_target_properties(client_tutorial PROPERTIES
+# 	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
+# set_target_properties(server-uds PROPERTIES
+# 	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
+# set_target_properties(client-uds PROPERTIES
+# 	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR10})
 
 set(DIR16 tutorial-16-graceful_restart)
 add_executable(bootstrap ${DIR16}/bootstrap.c)
 add_executable(bootstrap_server ${DIR16}/server.cc)
 target_link_libraries(bootstrap_server ${LIB})
 
-set_target_properties(bootstrap PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR16})
-set_target_properties(bootstrap_server PROPERTIES OUTPUT_NAME "server"
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR16})
+# set_target_properties(bootstrap PROPERTIES
+# 	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR16})
+# set_target_properties(bootstrap_server PROPERTIES OUTPUT_NAME "server"
+# 	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/${DIR16})
