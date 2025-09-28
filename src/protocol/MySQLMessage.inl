@@ -21,7 +21,6 @@
 #include <string.h>
 #include <utility>
 #include <string>
-#include <openssl/ssl.h>
 #include "SSLWrapper.h"
 
 namespace protocol

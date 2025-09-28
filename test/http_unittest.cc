@@ -207,7 +207,9 @@ KZ1lOvb+vi3TLrQf4tfBekrXXe5tZK40QSJ7UdtY7HHrrbAXU+8=
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 int main(int argc, char* argv[])
 {
 	OPENSSL_init_ssl(0, 0);

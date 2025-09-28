@@ -28,8 +28,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <openssl/ssl.h>
-#include <openssl/bio.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
+typedef void BIO;
 #include "list.h"
 #include "msgqueue.h"
 #include "thrdpool.h"

@@ -20,9 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <openssl/sha.h>
-#include <openssl/hmac.h>
-#include <openssl/evp.h>
+// OpenSSL dependencies removed
 #include "PlatformSocket.h"
 #include "kafka_parser.h"
 #ifdef WIN32

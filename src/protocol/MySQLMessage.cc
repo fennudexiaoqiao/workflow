@@ -21,10 +21,7 @@
 #include <string.h>
 #include <errno.h>
 #include <string>
-#include <openssl/sha.h>
-#include <openssl/rsa.h>
-#include <openssl/pem.h>
-#include <openssl/evp.h>
+// OpenSSL dependencies removed
 #include <utility>
 #include "SSLWrapper.h"
 #include "mysql_byteorder.h"
@@ -583,26 +580,7 @@ int MySQLRSAAuthRequest::encode(struct iovec vectors[], int max)
 	EVP_PKEY_CTX *pkey_ctx;
 	int ret = -1;
 
-	bio = BIO_new_mem_buf((void *)public_key_.c_str(), public_key_.size());
-	if (bio)
-	{
-		pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
-		if (pkey)
-		{
-			pkey_ctx = EVP_PKEY_CTX_new(pkey, NULL);
-			if (pkey_ctx)
-			{
-				ret = rsa_encrypt(pkey_ctx);
-				EVP_PKEY_CTX_free(pkey_ctx);
-			}
-
-			EVP_PKEY_free(pkey);
-		}
-
-		BIO_free(bio);
-	}
-
-	if (ret < 0)
+    if (ret < 0)
 		return ret;
 
 	return MySQLMessage::encode(vectors, max);

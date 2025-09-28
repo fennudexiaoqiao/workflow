@@ -22,7 +22,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <time.h>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
 
 typedef struct __poller poller_t;
 typedef struct __poller_message poller_message_t;

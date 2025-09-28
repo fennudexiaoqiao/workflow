@@ -21,7 +21,9 @@
 
 #include <utility>
 #include <functional>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "HttpMessage.h"
 #include "WFTask.h"
 #include "WFTaskFactory.h"

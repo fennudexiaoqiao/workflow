@@ -20,7 +20,10 @@
 #ifndef _COMMUNICATOR_H_
 #define _COMMUNICATOR_H_
 
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void BIO;
+typedef void SSL_CTX;
 #include <stddef.h>
 #include <stdint.h>
 #include <mutex>

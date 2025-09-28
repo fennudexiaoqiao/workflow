@@ -19,11 +19,13 @@
 #ifndef _SSLWRAPPER_H_
 #define _SSLWRAPPER_H_
 
-#include <openssl/ssl.h>
 #include "ProtocolMessage.h"
 
 namespace protocol
 {
+
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
 
 class SSLHandshaker : public ProtocolMessage
 {

@@ -16,7 +16,9 @@
   Authors: Wang Zhulei (wangzhulei@sogou-inc.com)
 */
 
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "WFTaskFactory.h"
 #include "KafkaMessage.h"
 

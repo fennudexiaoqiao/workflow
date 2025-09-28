@@ -25,7 +25,9 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "PlatformSocket.h"
 #include "list.h"
 #include "rbtree.h"
@@ -73,47 +75,6 @@ private:
 		return -1;
 	}
 #endif
-};
-
-/* To support TLS SNI. */
-class RouteTargetTCPSNI : public RouteTargetTCP
-{
-private:
-	virtual int init_ssl(SSL *ssl)
-	{
-		if (SSL_set_tlsext_host_name(ssl, this->hostname.c_str()) > 0)
-			return 0;
-		else
-			return -1;
-	}
-
-private:
-	std::string hostname;
-
-public:
-	RouteTargetTCPSNI(const std::string& name) : hostname(name)
-	{
-	}
-};
-
-class RouteTargetSCTPSNI : public RouteTargetSCTP
-{
-private:
-	virtual int init_ssl(SSL *ssl)
-	{
-		if (SSL_set_tlsext_host_name(ssl, this->hostname.c_str()) > 0)
-			return 0;
-		else
-			return -1;
-	}
-
-private:
-	std::string hostname;
-
-public:
-	RouteTargetSCTPSNI(const std::string& name) : hostname(name)
-	{
-	}
 };
 
 //  protocol_name\n user\n pass\n dbname\n ai_addr ai_addrlen \n....
@@ -185,20 +146,12 @@ RouteResultEntry::create_target(const struct RouteParams *params,
 
 	switch (params->transport_type)
 	{
-	case TT_TCP_SSL:
-		if (params->use_tls_sni)
-			target = new RouteTargetTCPSNI(params->hostname);
-		else
-	case TT_TCP:
-			target = new RouteTargetTCP();
+    case TT_TCP:
+        target = new RouteTargetTCP();
 		break;
 	case TT_UDP:
 		target = new RouteTargetUDP();
 		break;
-	case TT_SCTP_SSL:
-		if (params->use_tls_sni)
-			target = new RouteTargetSCTPSNI(params->hostname);
-		else
 	case TT_SCTP:
 			target = new RouteTargetSCTP();
 		break;

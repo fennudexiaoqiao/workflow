@@ -5,11 +5,12 @@ set(SRC
 	dns_parser.c
 	http_parser.c
 	redis_parser.c
-	mysql_stream.c
-	mysql_parser.c
-	mysql_byteorder.c
-	MySQLMessage.cc
-	MySQLResult.cc
+	# TODO 需要增加支持
+	# mysql_stream.c
+	# mysql_parser.c
+	# mysql_byteorder.c
+	# MySQLMessage.cc
+	# MySQLResult.cc
 	MySQLUtil.cc
 	DnsMessage.cc
 	DnsUtil.cc

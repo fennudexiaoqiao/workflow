@@ -22,7 +22,9 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "WFTask.h"
 #include "KafkaMessage.h"
 #include "KafkaResult.h"

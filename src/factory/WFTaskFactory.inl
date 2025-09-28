@@ -26,7 +26,9 @@
 #include <functional>
 #include <utility>
 #include <atomic>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "PlatformSocket.h"
 #include "WFGlobal.h"
 #include "Workflow.h"

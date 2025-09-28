@@ -25,7 +25,9 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "PlatformSocket.h"
 #include "CommScheduler.h"
 #include "EndpointParams.h"
@@ -183,9 +185,8 @@ protected:
 	void delete_connection(WFConnection *conn);
 
 private:
-	int init(const struct sockaddr *bind_addr, socklen_t addrlen,
-			 const char *cert_file, const char *key_file);
-	virtual void handle_unbound();
+    int init(const struct sockaddr *bind_addr, socklen_t addrlen);
+    virtual void handle_unbound();
 
 protected:
 	std::atomic<size_t> conn_count;

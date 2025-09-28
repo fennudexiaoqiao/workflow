@@ -23,9 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
-#include <openssl/ssl.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
 #include "WFTaskError.h"
 #include "WFTaskFactory.h"
 #include "StringUtil.h"
@@ -48,10 +45,10 @@ static int __encode_auth(const char *p, std::string& auth)
 
 	if (!base64)
 		return -1;
-
-	EVP_EncodeBlock((unsigned char *)base64, (const unsigned char *)p, len);
-	auth.append("Basic ");
-	auth.append(base64, base64_len);
+    //TODO FIXME 需要打开
+    //EVP_EncodeBlock((unsigned char *)base64, (const unsigned char *)p, len);
+    auth.append("Basic ");
+    auth.append(base64, base64_len);
 
 	free(base64);
 	return 0;
@@ -436,30 +433,7 @@ bool ComplexHttpTask::finish_once()
 
 static SSL *__create_ssl(SSL_CTX *ssl_ctx)
 {
-	BIO *wbio;
-	BIO *rbio;
-	SSL *ssl;
-
-	rbio = BIO_new(BIO_s_mem());
-	if (rbio)
-	{
-		wbio = BIO_new(BIO_s_mem());
-		if (wbio)
-		{
-			ssl = SSL_new(ssl_ctx);
-			if (ssl)
-			{
-				SSL_set_bio(ssl, rbio, wbio);
-				return ssl;
-			}
-
-			BIO_free(wbio);
-		}
-
-		BIO_free(rbio);
-	}
-
-	return NULL;
+    return NULL;
 }
 
 class ComplexHttpProxyTask : public ComplexHttpTask
@@ -531,27 +505,7 @@ private:
 
 int ComplexHttpProxyTask::init_ssl_connection()
 {
-	static SSL_CTX *ssl_ctx = WFGlobal::get_ssl_client_ctx();
-	SSL *ssl = __create_ssl(ssl_ctx_ ? ssl_ctx_ : ssl_ctx);
-	WFConnection *conn;
-
-	if (!ssl)
-		return -1;
-
-	SSL_set_tlsext_host_name(ssl, user_uri_.host);
-	SSL_set_connect_state(ssl);
-
-	conn = this->ComplexHttpTask::get_connection();
-	SSLConnection *ssl_conn = new SSLConnection(ssl);
-
-	auto&& deleter = [] (void *ctx)
-	{
-		SSLConnection *ssl_conn = (SSLConnection *)ctx;
-		SSL_free(ssl_conn->ssl);
-		delete ssl_conn;
-	};
-	conn->set_context(ssl_conn, std::move(deleter));
-	return 0;
+    return 0;
 }
 
 CommMessageOut *ComplexHttpProxyTask::message_out()
@@ -1094,21 +1048,6 @@ WFHttpTask *__new_https_server_session(long long seq, CommConnection *conn,
 										SSL_CTX *ssl_ctx,
 										std::function<void (WFHttpTask *)>& process)
 {
-	WFConnection *c = (WFConnection *)conn;
-
-	if (seq == 0)
-	{
-		SSL *ssl = __create_ssl(ssl_ctx);
-		SSL_set_accept_state(ssl);
-		auto *ssl_conn = new ServerSSLConnection(ssl);
-
-		c->set_context(ssl_conn, [](void *ssl_conn) {
-			auto *conn = (ServerSSLConnection *)ssl_conn;
-			SSL_free(conn->ssl);
-			delete conn;
-		});
-	}
-
-	return new WFHttpsServerTask(service, process);
+    return 0;
 }
 

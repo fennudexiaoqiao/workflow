@@ -20,7 +20,9 @@
 #ifndef _COMMSCHEDULER_H_
 #define _COMMSCHEDULER_H_
 
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include <mutex>
 #include <condition_variable>
 #include "PlatformSocket.h"

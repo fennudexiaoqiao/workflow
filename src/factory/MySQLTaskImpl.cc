@@ -23,8 +23,10 @@
 #include <assert.h>
 #include <string>
 #include <unordered_map>
-#include <openssl/ssl.h>
-#include <openssl/bio.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
+typedef void BIO;
 #include "WFTaskError.h"
 #include "WFTaskFactory.h"
 #include "StringUtil.h"
@@ -151,30 +153,7 @@ bool ComplexMySQLTask::check_request()
 
 static SSL *__create_ssl(SSL_CTX *ssl_ctx)
 {
-	BIO *wbio;
-	BIO *rbio;
-	SSL *ssl;
-
-	rbio = BIO_new(BIO_s_mem());
-	if (rbio)
-	{
-		wbio = BIO_new(BIO_s_mem());
-		if (wbio)
-		{
-			ssl = SSL_new(ssl_ctx);
-			if (ssl)
-			{
-				SSL_set_bio(ssl, rbio, wbio);
-				return ssl;
-			}
-
-			BIO_free(wbio);
-		}
-
-		BIO_free(rbio);
-	}
-
-	return NULL;
+    return NULL;
 }
 
 CommMessageOut *ComplexMySQLTask::message_out()
@@ -348,34 +327,8 @@ int ComplexMySQLTask::check_handshake(MySQLHandshakeResponse *resp)
 		return 0;
 	}
 
-	if (is_ssl_)
-	{
-		if (resp->get_capability_flags() & 0x800)
-		{
-			static SSL_CTX *ssl_ctx = WFGlobal::get_ssl_client_ctx();
-
-			ssl = __create_ssl(ssl_ctx_ ? ssl_ctx_ : ssl_ctx);
-			if (!ssl)
-			{
-				state_ = WFT_STATE_SYS_ERROR;
-				error_ = errno;
-				return 0;
-			}
-
-			SSL_set_connect_state(ssl);
-		}
-		else
-		{
-			this->resp = std::move(*(MySQLResponse *)resp);
-			state_ = WFT_STATE_TASK_ERROR;
-			error_ = WFT_ERR_MYSQL_SSL_NOT_SUPPORTED;
-			return 0;
-		}
-
-	}
-
-	auto *conn = this->get_connection();
-	auto *my_conn = new MyConnection(ssl);
+    auto *conn = this->get_connection();
+    auto *my_conn = new MyConnection(ssl);
 
 	my_conn->str = resp->get_auth_plugin_name();
 	if (!password_.empty() && my_conn->str == "sha256_password")
@@ -386,8 +339,7 @@ int ComplexMySQLTask::check_handshake(MySQLHandshakeResponse *resp)
 	my_conn->mysql_seqid = resp->get_seqid() + 1;
 	conn->set_context(my_conn, [](void *ctx) {
 		auto *my_conn = (MyConnection *)ctx;
-		if (my_conn->ssl)
-			SSL_free(my_conn->ssl);
+		
 		delete my_conn;
 	});
 

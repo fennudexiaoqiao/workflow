@@ -27,13 +27,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <fstream>
-#include <openssl/ssl.h>
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-# include <openssl/err.h>
-# include <openssl/engine.h>
-# include <openssl/conf.h>
-# include <openssl/crypto.h>
-#endif
 #include "WFGlobal.h"
 #include "EndpointParams.h"
 #include "CommScheduler.h"
@@ -193,75 +186,7 @@ static __WFGlobal *_g_global = __WFGlobal::get_instance();
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 static std::mutex *__ssl_mutex;
 
-static void ssl_locking_callback(int mode, int type, const char* file, int line)
-{
-	if (mode & CRYPTO_LOCK)
-		__ssl_mutex[type].lock();
-	else if (mode & CRYPTO_UNLOCK)
-		__ssl_mutex[type].unlock();
-}
 #endif
-
-class __SSLManager
-{
-public:
-	static __SSLManager *get_instance()
-	{
-		static __SSLManager kInstance;
-		return &kInstance;
-	}
-
-	SSL_CTX *get_ssl_client_ctx() { return ssl_client_ctx_; }
-	SSL_CTX *new_ssl_server_ctx() { return SSL_CTX_new(SSLv23_server_method()); }
-
-private:
-	__SSLManager()
-	{
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-		__ssl_mutex = new std::mutex[CRYPTO_num_locks()];
-		CRYPTO_set_locking_callback(ssl_locking_callback);
-		SSL_library_init();
-		SSL_load_error_strings();
-		//ERR_load_crypto_strings();
-		//OpenSSL_add_all_algorithms();
-#endif
-
-		ssl_client_ctx_ = SSL_CTX_new(SSLv23_client_method());
-		if (ssl_client_ctx_ == NULL)
-			abort();
-	}
-
-	~__SSLManager()
-	{
-		SSL_CTX_free(ssl_client_ctx_);
-
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-		//free ssl to avoid memory leak
-		FIPS_mode_set(0);
-		CRYPTO_set_locking_callback(NULL);
-# ifdef CRYPTO_LOCK_ECDH
-		CRYPTO_THREADID_set_callback(NULL);
-# else
-		CRYPTO_set_id_callback(NULL);
-# endif
-		ENGINE_cleanup();
-		CONF_modules_unload(1);
-		ERR_free_strings();
-		EVP_cleanup();
-# ifdef CRYPTO_LOCK_ECDH
-		ERR_remove_thread_state(NULL);
-# else
-		ERR_remove_state(0);
-# endif
-		CRYPTO_cleanup_all_ex_data();
-		sk_SSL_COMP_free(SSL_COMP_get_compression_methods());
-		delete []__ssl_mutex;
-#endif
-	}
-
-private:
-	SSL_CTX *ssl_client_ctx_;
-};
 
 class __FileIOService : public IOService
 {
@@ -685,12 +610,12 @@ CommScheduler *WFGlobal::get_scheduler()
 
 SSL_CTX *WFGlobal::get_ssl_client_ctx()
 {
-	return __SSLManager::get_instance()->get_ssl_client_ctx();
+    return 0;
 }
 
 SSL_CTX *WFGlobal::new_ssl_server_ctx()
 {
-	return __SSLManager::get_instance()->new_ssl_server_ctx();
+    return 0;
 }
 
 ExecQueue *WFGlobal::get_exec_queue(const std::string& queue_name)
@@ -759,55 +684,7 @@ void WFGlobal::sync_operation_end(int cookie)
 
 static inline const char *__get_ssl_error_string(int error)
 {
-	switch (error)
-	{
-	case SSL_ERROR_NONE:
-		return "SSL Error None";
-
-	case SSL_ERROR_ZERO_RETURN:
-		return "SSL Error Zero Return";
-
-	case SSL_ERROR_WANT_READ:
-		return "SSL Error Want Read";
-
-	case SSL_ERROR_WANT_WRITE:
-		return "SSL Error Want Write";
-
-	case SSL_ERROR_WANT_CONNECT:
-		return "SSL Error Want Connect";
-
-	case SSL_ERROR_WANT_ACCEPT:
-		return "SSL Error Want Accept";
-
-	case SSL_ERROR_WANT_X509_LOOKUP:
-		return "SSL Error Want X509 Lookup";
-
-#ifdef SSL_ERROR_WANT_ASYNC
-	case SSL_ERROR_WANT_ASYNC:
-		return "SSL Error Want Async";
-#endif
-
-#ifdef SSL_ERROR_WANT_ASYNC_JOB
-	case SSL_ERROR_WANT_ASYNC_JOB:
-		return "SSL Error Want Async Job";
-#endif
-
-#ifdef SSL_ERROR_WANT_CLIENT_HELLO_CB
-	case SSL_ERROR_WANT_CLIENT_HELLO_CB:
-		return "SSL Error Want Client Hello CB";
-#endif
-
-	case SSL_ERROR_SYSCALL:
-		return "SSL System Error";
-
-	case SSL_ERROR_SSL:
-		return "SSL Error SSL";
-
-	default:
-		break;
-	}
-
-	return "Unknown";
+    return "Unknown";
 }
 
 static inline const char *__get_task_error_string(int error)

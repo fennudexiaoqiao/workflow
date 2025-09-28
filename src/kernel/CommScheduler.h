@@ -22,7 +22,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <pthread.h>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "Communicator.h"
 
 class CommSchedObject

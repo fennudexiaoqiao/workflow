@@ -25,7 +25,9 @@
 #include <time.h>
 #include <stddef.h>
 #include <pthread.h>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
+typedef void SSL_CTX;
 #include "list.h"
 #include "poller.h"
 

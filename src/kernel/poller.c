@@ -34,7 +34,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <openssl/ssl.h>
+// Forward declaration to avoid OpenSSL dependency
+typedef void SSL;
 #include "list.h"
 #include "rbtree.h"
 #include "poller.h"
